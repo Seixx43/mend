@@ -405,7 +405,11 @@ function unifiedEdits(lines: string[]): Edit[] {
       continue;
     }
     if (line.startsWith('--- ')) {
-      if (!cur || curHeader) throw new Exit2(`error: parse ${i + 2}`);
+      // SPEC section 6: a `--- ` line not followed by `+++ ` is a parse
+      // error only inside a section's header. Before any section it is
+      // prose, and outside a body it is ignored like any other prose line;
+      // a patch that never gets a section still fails with parse 1 below.
+      if (cur && curHeader) throw new Exit2(`error: parse ${i + 2}`);
       i += 1;
       continue;
     }
